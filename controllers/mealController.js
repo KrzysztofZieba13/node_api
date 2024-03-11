@@ -1,6 +1,7 @@
 const Meal = require('../models/mealModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 exports.aliasTopMeals = function (req, res, next) {
   req.query.limit = '5';
@@ -59,8 +60,13 @@ exports.updateMeal = catchAsync(async function (req, res) {
   });
 });
 
-exports.deleteMeal = catchAsync(async function (req, res) {
-  await Meal.findByIdAndDelete(req.params.id);
+exports.deleteMeal = catchAsync(async function (req, res, next) {
+  const tour = await Meal.findByIdAndDelete(req.params.id);
+
+  if (!tour) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
+
   res.status(204).json({
     status: 'success',
     data: null,

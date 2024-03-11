@@ -1,5 +1,6 @@
 const express = require('express');
 const mealController = require('../controllers/mealController');
+const authController = require('../controllers/authController');
 
 const router = express.Router(); // sub-app
 
@@ -14,13 +15,17 @@ router
 
 router
   .route('/')
-  .get(mealController.getAllMeals)
+  .get(authController.protect, mealController.getAllMeals)
   .post(mealController.createMeal);
 
 router
   .route('/:id')
   .get(mealController.getMeal)
   .patch(mealController.updateMeal)
-  .delete(mealController.deleteMeal);
+  .delete(
+    authController.protect,
+    authController.restrictTo('admin', 'lead-guide'),
+    mealController.deleteMeal,
+  );
 
 module.exports = router;
